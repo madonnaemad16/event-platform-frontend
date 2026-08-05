@@ -1,11 +1,12 @@
 /**
- * Convene Event Management Platform - Main Application Bootstrap & Event Handlers
+ * Convene Event Management Platform - Application Bootstrap & Handlers
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   // Register Routes
   window.router.addRoute('dashboard', () => renderDashboardView());
   window.router.addRoute('events', (params) => renderEventsView(params));
+  window.router.addRoute('saved', () => renderSavedEventsView());
   window.router.addRoute('event-detail', (params) => renderEventDetailView(params));
   window.router.addRoute('create', () => renderCreateEventView());
   window.router.addRoute('*', () => renderDashboardView());
@@ -13,11 +14,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Global View Loaded Lifecycle Callback
   window.onViewLoaded = (path, params) => {
     attachViewEventListeners(path, params);
+    updateSavedBadge();
   };
 
-  // Initial routing
+  // Initial badge setup & routing
+  updateSavedBadge();
   window.router.handleRoute();
 });
+
+// Update Saved Badge Counter in Navbar
+function updateSavedBadge() {
+  const badge = document.getElementById('saved-badge');
+  if (badge && window.eventStore) {
+    const savedCount = window.eventStore.getSavedIds().length;
+    badge.textContent = savedCount;
+  }
+}
 
 // Toast notification helper
 function showToast(message, type = 'success') {
@@ -38,19 +50,43 @@ function showToast(message, type = 'success') {
 
   toastContainer.appendChild(toast);
 
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-
+  setTimeout(() => toast.classList.add('show'), 10);
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 300);
   }, 3500);
 }
 
-// Attach View Specific Handlers
+// Attach View Event Listeners
 function attachViewEventListeners(path, params) {
-  // 1. Search Bar Event Listener in Events View
+  // 1. Favorite Heart Button Delegate Handler
+  document.querySelectorAll('.btn-favorite').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const eventId = btn.getAttribute('data-event-id');
+      const isNowSaved = window.eventStore.toggleSaveEvent(eventId);
+      
+      updateSavedBadge();
+
+      if (isNowSaved) {
+        btn.classList.add('active');
+        btn.innerHTML = '❤️';
+        showToast('Event saved to favorites! ❤️', 'success');
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '🤍';
+        showToast('Event removed from saved list.', 'success');
+        
+        // If on saved page, re-render
+        if (path === 'saved') {
+          window.router.handleRoute();
+        }
+      }
+    });
+  });
+
+  // 2. Search Bar Listener in Events View
   const searchInput = document.getElementById('event-search-input');
   const searchBtn = document.getElementById('btn-search-trigger');
   
@@ -65,15 +101,13 @@ function attachViewEventListeners(path, params) {
       window.location.hash = hash;
     };
 
-    if (searchBtn) {
-      searchBtn.addEventListener('click', handleSearch);
-    }
+    if (searchBtn) searchBtn.addEventListener('click', handleSearch);
     searchInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleSearch();
     });
   }
 
-  // 2. RSVP Form Handler in Event Details View
+  // 3. RSVP Form Handler
   const rsvpForm = document.getElementById('rsvp-form');
   if (rsvpForm) {
     rsvpForm.addEventListener('submit', (e) => {
@@ -84,8 +118,7 @@ function attachViewEventListeners(path, params) {
 
       try {
         window.eventStore.registerAttendee(eventId, { name, email });
-        showToast(`Success! ${name}, your seat has been reserved! 🎉`, 'success');
-        // Refresh detail view
+        showToast(`Success! ${name}, your registration is confirmed! 🎉`, 'success');
         window.router.handleRoute();
       } catch (err) {
         showToast(err.message || 'Registration failed', 'error');
@@ -93,20 +126,20 @@ function attachViewEventListeners(path, params) {
     });
   }
 
-  // 3. Delete Event Button in Event Details View
+  // 4. Delete Event Button
   const deleteBtn = document.getElementById('btn-delete-event');
   if (deleteBtn) {
     deleteBtn.addEventListener('click', () => {
       const eventId = deleteBtn.getAttribute('data-event-id');
-      if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      if (confirm('Are you sure you want to delete this event?')) {
         window.eventStore.deleteEvent(eventId);
-        showToast('Event removed successfully', 'success');
+        showToast('Event deleted successfully.', 'success');
         window.location.hash = '#events';
       }
     });
   }
 
-  // 4. Create Event Form Handler
+  // 5. Create Event Form Handler
   const createForm = document.getElementById('create-event-form');
   if (createForm) {
     createForm.addEventListener('submit', (e) => {
@@ -133,7 +166,7 @@ function attachViewEventListeners(path, params) {
         description
       });
 
-      showToast(`'${title}' is now live! ✨`, 'success');
+      showToast(`'${title}' created successfully! ✨`, 'success');
       window.location.hash = `#event-detail?id=${newEvent.id}`;
     });
   }

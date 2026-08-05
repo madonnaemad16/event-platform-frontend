@@ -27,12 +27,16 @@ function renderEventsView(params) {
 
   const cardsHtml = filteredEvents.length > 0 ? filteredEvents.map(evt => {
     const seatPercentage = Math.round((evt.registered / evt.capacity) * 100);
+    const isSaved = window.eventStore.isSaved(evt.id);
+    
     return `
       <div class="event-card">
         <div class="card-image-wrapper">
           <img src="${evt.image}" alt="${evt.title}" class="card-image" loading="lazy">
           <span class="badge category-badge">${evt.category}</span>
-          <span class="badge type-badge">${evt.type}</span>
+          <button class="btn-favorite ${isSaved ? 'active' : ''}" data-event-id="${evt.id}" title="${isSaved ? 'Saved' : 'Save Event'}">
+            ${isSaved ? '❤️' : '🤍'}
+          </button>
         </div>
         <div class="card-body">
           <div class="card-meta">
@@ -40,7 +44,7 @@ function renderEventsView(params) {
             <span>📍 ${evt.location.split(',')[0]}</span>
           </div>
           <h3 class="card-title">${evt.title}</h3>
-          <p class="card-desc">${evt.description.substring(0, 100)}...</p>
+          <p class="card-desc">${evt.description.substring(0, 90)}...</p>
           
           <div class="capacity-section">
             <div class="capacity-header">
@@ -73,9 +77,9 @@ function renderEventsView(params) {
       <div class="events-header">
         <div>
           <h1 class="page-title">Browse Events</h1>
-          <p class="page-subtitle">Discover live tech summits, creative design workshops, and business networking sessions.</p>
+          <p class="page-subtitle">Discover tech conferences, creative design workshops, and community events.</p>
         </div>
-        <a href="#create" class="btn btn-primary">+ Host an Event</a>
+        <a href="#create" class="btn btn-primary">+ Add Event</a>
       </div>
 
       <!-- Controls & Filter Toolbar -->
@@ -84,7 +88,7 @@ function renderEventsView(params) {
           ${categoryTabsHtml}
         </div>
         <div class="search-box">
-          <input type="text" id="event-search-input" placeholder="Search events by title or location..." value="${params.get('search') || ''}">
+          <input type="text" id="event-search-input" placeholder="Search by title or location..." value="${params.get('search') || ''}">
           <button id="btn-search-trigger" class="btn btn-sm btn-secondary">Search</button>
         </div>
       </div>

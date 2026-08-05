@@ -4,18 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Convene | Event Management Platform</title>
-  <meta name="description" content="Discover, host, and manage world-class events, tech summits, design workshops, and community hackathons.">
+  <meta name="description" content="Discover, host, and manage simple events, workshops, and community gatherings.">
   
-  <!-- Google Fonts & Typography -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <!-- Header / Navigation Bar -->
+  <!-- Navigation Header -->
   <header class="navbar">
     <div class="nav-container">
       <a href="#dashboard" class="logo">
@@ -25,30 +25,34 @@
       <nav class="nav-links">
         <a href="#dashboard" class="nav-link active">Dashboard</a>
         <a href="#events" class="nav-link">Events</a>
-        <a href="#create" class="nav-link btn-nav">+ Host Event</a>
+        <a href="#saved" class="nav-link" id="nav-saved-link">
+          Saved ❤️ <span id="saved-badge" class="badge-count">0</span>
+        </a>
+        <a href="#create" class="nav-link btn-nav">+ Add Event</a>
       </nav>
     </div>
   </header>
 
-  <!-- Main Container for Single Page Application Views -->
+  <!-- Main View Container -->
   <main id="app-content" class="main-container">
-    <!-- Dynamic SPA views rendered here -->
+    <!-- Dynamic view content -->
   </main>
 
-  <!-- Footer -->
+  <!-- Simple Footer -->
   <footer class="footer">
     <div class="footer-container">
-      <p>© 2026 Convene Event Platform. All rights reserved.</p>
+      <p>© 2026 Convene Event Platform — Simple Event Management</p>
     </div>
   </footer>
 
-  <!-- Application Scripts -->
+  <!-- Scripts -->
   <script src="js/store.js"></script>
   <script src="js/router.js"></script>
   <script src="js/views/dashboard.js"></script>
   <script src="js/views/events.js"></script>
   <script src="js/views/eventDetail.js"></script>
   <script src="js/views/createEvent.js"></script>
+  <script src="js/views/savedEvents.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
