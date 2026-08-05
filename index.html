@@ -4,26 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Convene | Event Management Platform</title>
+  <meta name="description" content="Discover, host, and manage world-class events, tech summits, design workshops, and community hackathons.">
+  
+  <!-- Google Fonts & Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <!-- Header / Navigation Bar -->
   <header class="navbar">
     <div class="nav-container">
-      <a href="#dashboard" class="logo">Convene</a>
+      <a href="#dashboard" class="logo">
+        <span class="logo-icon">🎪</span>
+        <span class="logo-text">Convene</span>
+      </a>
       <nav class="nav-links">
         <a href="#dashboard" class="nav-link active">Dashboard</a>
         <a href="#events" class="nav-link">Events</a>
-        <a href="#create" class="nav-link btn-nav">+ New Event</a>
+        <a href="#create" class="nav-link btn-nav">+ Host Event</a>
       </nav>
     </div>
   </header>
 
-  <!-- Main Content Container for SPA Views -->
+  <!-- Main Container for Single Page Application Views -->
   <main id="app-content" class="main-container">
-    <!-- SPA Views will be rendered here -->
+    <!-- Dynamic SPA views rendered here -->
   </main>
 
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>© 2026 Convene Event Platform. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Application Scripts -->
+  <script src="js/store.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/views/dashboard.js"></script>
+  <script src="js/views/events.js"></script>
+  <script src="js/views/eventDetail.js"></script>
+  <script src="js/views/createEvent.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
