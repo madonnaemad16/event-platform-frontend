@@ -9,7 +9,7 @@ const INITIAL_EVENTS = [
     title: "Global AI & Tech Summit 2026",
     category: "Technology",
     date: "2026-09-15T09:00",
-    location: "Convention Center, San Francisco",
+    location: "San Francisco, CA",
     organizer: "Tech Global Network",
     type: "In-Person",
     capacity: 250,
@@ -32,7 +32,7 @@ const INITIAL_EVENTS = [
     title: "UI/UX Design Systems Workshop",
     category: "Design",
     date: "2026-09-22T10:00",
-    location: "Design Hub, New York",
+    location: "New York, NY",
     organizer: "Creative Designers Guild",
     type: "In-Person",
     capacity: 120,
@@ -72,7 +72,7 @@ const INITIAL_EVENTS = [
     title: "Business & Startup Meetup",
     category: "Business",
     date: "2026-10-18T18:00",
-    location: "Skyline Lounge, Austin",
+    location: "Austin, TX",
     organizer: "Austin Business Club",
     type: "In-Person",
     capacity: 80,
@@ -91,7 +91,7 @@ const INITIAL_EVENTS = [
     title: "Live Music & Arts Night",
     category: "Music",
     date: "2026-11-01T16:00",
-    location: "City Park Stage, Los Angeles",
+    location: "Los Angeles, CA",
     organizer: "City Cultural Arts",
     type: "In-Person",
     capacity: 1500,
@@ -109,7 +109,7 @@ const INITIAL_EVENTS = [
 
 class EventStore {
   constructor() {
-    this.storageKey = 'convene_events_data_v1';
+    this.storageKey = 'convene_events_data_v2';
     this.savedKey = 'convene_saved_events_v1';
     this.init();
   }
@@ -138,13 +138,13 @@ class EventStore {
 
   getEventById(id) {
     const events = this.getEvents();
-    return events.find(evt => evt.id === id);
+    return events.find(evt => evt.id === id) || null;
   }
 
   addEvent(eventData) {
     const events = this.getEvents();
     const newEvent = {
-      id: `evt-${Date.now().toString().slice(-4)}`,
+      id: `evt-${Date.now().toString().slice(-6)}`,
       registered: 0,
       attendees: [],
       agenda: eventData.agenda || [{ time: "09:00 AM", title: "Event Starts" }],
@@ -155,31 +155,65 @@ class EventStore {
     return newEvent;
   }
 
+  updateEvent(id, eventData) {
+    const events = this.getEvents();
+    const index = events.findIndex(e => e.id === id);
+    if (index === -1) throw new Error('Event not found');
+    events[index] = { ...events[index], ...eventData };
+    this.saveEvents(events);
+    return events[index];
+  }
+
   deleteEvent(id) {
     let events = this.getEvents();
     events = events.filter(e => e.id !== id);
     this.saveEvents(events);
     // Also remove from saved if present
-    this.toggleSaveEvent(id, false);
+    let savedIds = this.getSavedIds().filter(sid => sid !== id);
+    localStorage.setItem(this.savedKey, JSON.stringify(savedIds));
   }
 
   registerAttendee(eventId, attendee) {
     const events = this.getEvents();
     const event = events.find(e => e.id === eventId);
-    if (event) {
-      if (event.registered >= event.capacity) {
-        throw new Error("Sorry, this event is full!");
-      }
-      event.registered += 1;
-      event.attendees = event.attendees || [];
-      event.attendees.push({
-        ...attendee,
-        date: new Date().toISOString().split('T')[0]
-      });
-      this.saveEvents(events);
-      return event;
+    if (!event) throw new Error("Event not found");
+
+    if (event.registered >= event.capacity) {
+      throw new Error("Sorry, this event is full!");
     }
-    throw new Error("Event not found");
+
+    // Prevent duplicate email
+    event.attendees = event.attendees || [];
+    const duplicate = event.attendees.find(a => a.email.toLowerCase() === attendee.email.toLowerCase());
+    if (duplicate) {
+      throw new Error("This email is already registered for this event.");
+    }
+
+    event.registered += 1;
+    event.attendees.push({
+      ...attendee,
+      date: new Date().toISOString().split('T')[0]
+    });
+    this.saveEvents(events);
+    return event;
+  }
+
+  cancelRegistration(eventId, attendeeEmail) {
+    const events = this.getEvents();
+    const event = events.find(e => e.id === eventId);
+    if (!event) throw new Error("Event not found");
+
+    const before = (event.attendees || []).length;
+    event.attendees = (event.attendees || []).filter(
+      a => a.email.toLowerCase() !== attendeeEmail.toLowerCase()
+    );
+    const after = event.attendees.length;
+
+    if (before !== after) {
+      event.registered = Math.max(0, event.registered - 1);
+    }
+    this.saveEvents(events);
+    return event;
   }
 
   // Saved / Bookmarked Events
@@ -193,22 +227,18 @@ class EventStore {
   }
 
   isSaved(eventId) {
-    const savedIds = this.getSavedIds();
-    return savedIds.includes(eventId);
+    return this.getSavedIds().includes(eventId);
   }
 
   toggleSaveEvent(eventId, forceState) {
     let savedIds = this.getSavedIds();
     const index = savedIds.indexOf(eventId);
-    
     let isNowSaved = false;
     if (forceState === false || (forceState === undefined && index !== -1)) {
       savedIds = savedIds.filter(id => id !== eventId);
       isNowSaved = false;
     } else {
-      if (index === -1) {
-        savedIds.push(eventId);
-      }
+      if (index === -1) savedIds.push(eventId);
       isNowSaved = true;
     }
     localStorage.setItem(this.savedKey, JSON.stringify(savedIds));
@@ -217,21 +247,29 @@ class EventStore {
 
   getSavedEvents() {
     const savedIds = this.getSavedIds();
-    const allEvents = this.getEvents();
-    return allEvents.filter(e => savedIds.includes(e.id));
+    return this.getEvents().filter(e => savedIds.includes(e.id));
   }
 
   getStats() {
     const events = this.getEvents();
+    const now = new Date();
+
     const totalEvents = events.length;
-    const totalRegistered = events.reduce((sum, e) => sum + (e.registered || 0), 0);
-    const totalCapacity = events.reduce((sum, e) => sum + (e.capacity || 0), 0);
-    const availableSeats = Math.max(0, totalCapacity - totalRegistered);
-    
+    const upcomingEvents = events.filter(e => new Date(e.date) > now).length;
+    const totalRegistrations = events.reduce((sum, e) => sum + (e.registered || 0), 0);
+
+    let mostPopularEvent = null;
+    if (events.length > 0) {
+      mostPopularEvent = events.reduce((best, e) =>
+        (e.registered || 0) > (best.registered || 0) ? e : best
+      , events[0]);
+    }
+
     return {
       totalEvents,
-      totalRegistered,
-      availableSeats
+      upcomingEvents,
+      totalRegistrations,
+      mostPopularEvent
     };
   }
 }

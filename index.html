@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Convene | Event Management Platform</title>
-  <meta name="description" content="Discover, host, and manage simple events, workshops, and community gatherings.">
-  
+  <meta name="description" content="Discover, host, and manage events, workshops, and community gatherings with Convene.">
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -23,19 +23,16 @@
         <span class="logo-text">Convene</span>
       </a>
       <nav class="nav-links">
-        <a href="#dashboard" class="nav-link active">Dashboard</a>
-        <a href="#events" class="nav-link">Events</a>
-        <a href="#saved" class="nav-link" id="nav-saved-link">
-          Saved ❤️ <span id="saved-badge" class="badge-count">0</span>
-        </a>
-        <a href="#create" class="nav-link btn-nav">+ Add Event</a>
+        <a href="#dashboard" class="nav-link active" id="nav-dashboard">Dashboard</a>
+        <a href="#events" class="nav-link" id="nav-events">Events</a>
+        <a href="#create" class="nav-link btn-nav" id="nav-create">+ New Event</a>
       </nav>
     </div>
   </header>
 
   <!-- Main View Container -->
   <main id="app-content" class="main-container">
-    <!-- Dynamic view content -->
+    <!-- Dynamic view content injected here -->
   </main>
 
   <!-- Simple Footer -->
@@ -44,6 +41,21 @@
       <p>© 2026 Convene Event Platform — Simple Event Management</p>
     </div>
   </footer>
+
+  <!-- Confirmation Modal -->
+  <div id="confirm-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <h3 id="modal-title" class="modal-title">Are you sure?</h3>
+      <p id="modal-message" class="modal-message">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+        <button id="modal-confirm-btn" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container (injected by JS) -->
 
   <!-- Scripts -->
   <script src="js/store.js"></script>
